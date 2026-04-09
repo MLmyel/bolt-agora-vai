@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RoleProvider } from "@/lib/roleContext";
 import Layout from "@/components/Layout";
+import HomePage from "@/pages/HomePage";
 import CatalogPage from "@/pages/CatalogPage";
 import NewQueryPage from "@/pages/NewQueryPage";
 import ChatPage from "@/pages/ChatPage";
@@ -25,7 +26,8 @@ function Router() {
   return (
     <Layout>
       <Switch>
-        <Route path="/" component={CatalogPage} />
+        <Route path="/" component={HomePage} />
+        <Route path="/catalogo" component={CatalogPage} />
         <Route path="/catalogo/:id" component={TableDetailPage} />
         <Route path="/nova-consulta" component={NewQueryPage} />
         <Route path="/chat" component={ChatPage} />

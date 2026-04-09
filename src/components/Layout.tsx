@@ -15,7 +15,7 @@ import UserProfileMenu from "./UserProfileMenu";
 const NAV_ITEMS = [
   {
     label: "Catálogo",
-    path: "/",
+    path: "/catalogo",
     icon: LayoutDashboard,
     description: "Explorar e pesquisar dados",
   },
