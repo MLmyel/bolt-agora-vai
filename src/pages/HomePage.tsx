@@ -55,7 +55,7 @@ export default function HomePage() {
         </div>
         <button
           type="button"
-          className="flex-shrink-0 px-4 py-2.5 rounded-lg border border-border bg-white text-sm font-medium text-foreground shadow-sm cursor-default"
+          className="flex-shrink-0 px-4 py-2.5 rounded-lg border border-border bg-white text-sm font-medium text-foreground shadow-sm cursor-default hover:border-primary/40 transition-colors duration-150"
           tabIndex={-1}
         >
           Busca Avançada
@@ -69,7 +69,7 @@ export default function HomePage() {
           {ROW1_TAGS.map((tag) => (
             <span
               key={tag}
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-default select-none ${tagColor(tag)}`}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-default select-none border border-transparent hover:border-current/25 transition-colors duration-150 ${tagColor(tag)}`}
             >
               {tag}
             </span>
@@ -81,12 +81,12 @@ export default function HomePage() {
           {ROW2_TAGS.map((tag) => (
             <span
               key={tag}
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-default select-none ${tagColor(tag)}`}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-default select-none border border-transparent hover:border-current/25 transition-colors duration-150 ${tagColor(tag)}`}
             >
               {tag}
             </span>
           ))}
-          <span className="text-xs font-medium text-primary underline underline-offset-2 cursor-default select-none px-1">
+          <span className="text-xs font-medium text-primary underline underline-offset-2 cursor-default select-none px-2 py-1 rounded-full border border-transparent hover:border-primary/40 transition-colors duration-150">
             Confira mais tags
           </span>
         </div>
