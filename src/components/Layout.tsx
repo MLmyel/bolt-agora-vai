@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Shield,
   ChevronLeft,
+  Home,
 } from "lucide-react";
 import { useRole } from "@/lib/roleContext";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,12 @@ import oracleLogo from "@assets/ORCL_1774809620248.png";
 import UserProfileMenu from "./UserProfileMenu";
 
 const NAV_ITEMS = [
+  {
+    label: "Tela inicial",
+    path: "/",
+    icon: Home,
+    description: "Acessar o painel principal",
+  },
   {
     label: "Catálogo",
     path: "/catalogo",
@@ -100,7 +107,9 @@ function Sidebar() {
         "flex items-center border-b border-sidebar-border flex-shrink-0 h-[60px]",
         isExpanded ? "px-4 justify-between" : "justify-center px-0"
       )}>
-        <OracleLogo expanded={isExpanded} />
+        <Link href="/">
+          <OracleLogo expanded={isExpanded} />
+        </Link>
 
         {/* Collapse button — only when expanded */}
         {isExpanded && (
