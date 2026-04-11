@@ -53,7 +53,7 @@ function tagColor(tag: string) {
 export default function CatalogPage() {
   const { isManager } = useRole();
   const [, navigate] = useLocation();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
   const [typeFilter, setTypeFilter] = useState<string>("todos");
   const [tagFilter, setTagFilter] = useState<string>("todas");
   const [dbFilter, setDbFilter] = useState<string>("todos");
