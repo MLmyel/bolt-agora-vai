@@ -10,6 +10,11 @@ import {
 import { INITIAL_CHAT, ChatMessage } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 
+const SPECIFIC_RESPONSES: Record<string, string> = {
+  "Quais as tabelas com a data de atualização mais antiga?":
+    "Analisando os metadados do catálogo, identifiquei as **3 tabelas com a data de atualização mais antiga**:\n\n| Tabela | Última Atualização |\n|---|---|\n| `tb_regioes` | 10/01/2025 |\n| `tb_produtos` | 05/03/2025 |\n| `tb_pedidos_venda` | 10/03/2025 |\n\nEssas entradas podem indicar dados desatualizados. Recomendo verificar com os responsáveis pelos respectivos pipelines de ingestão.",
+};
+
 const MOCK_RESPONSES = [
   "Pesquisei o catálogo e encontrei **2 entradas correspondentes** à sua consulta. Quer que eu mostre os detalhes completos?",
   "Com base nos metadados do catálogo, a tabela mais relevante é `tb_clientes`, de propriedade do **time-crm**. Tags: `clientes`, `crm`, `dados-mestre`.",
@@ -167,8 +172,9 @@ export default function ChatPage() {
     setIsTyping(true);
 
     setTimeout(() => {
-      const response = MOCK_RESPONSES[responseIndex.current % MOCK_RESPONSES.length];
-      responseIndex.current++;
+      const specific = SPECIFIC_RESPONSES[text];
+      const response = specific ?? MOCK_RESPONSES[responseIndex.current % MOCK_RESPONSES.length];
+      if (!specific) responseIndex.current++;
       const aiMsg: ChatMessage = {
         id: String(Date.now() + 1),
         role: "assistant",
