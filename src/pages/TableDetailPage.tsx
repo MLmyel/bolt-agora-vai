@@ -233,7 +233,7 @@ export default function TableDetailPage() {
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         <Database className="w-10 h-10 text-muted-foreground/30" />
         <p className="text-sm text-muted-foreground">Entrada não encontrada no catálogo.</p>
-        <Link href="/">
+        <Link href="/catalogo">
           <button className="text-xs text-primary hover:underline flex items-center gap-1">
             <ArrowLeft className="w-3.5 h-3.5" /> Voltar ao catálogo
           </button>
@@ -249,14 +249,14 @@ export default function TableDetailPage() {
       {/* Breadcrumb + ações */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/">
+          <Link href="/catalogo">
             <button className="hover:text-foreground transition-colors">Catálogo</button>
           </Link>
           <span>/</span>
           <span className="text-foreground font-medium">{entry.tableName}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/">
+          <Link href="/catalogo">
             <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg border border-border transition-colors">
               <ArrowLeft className="w-3.5 h-3.5" />
               Voltar
