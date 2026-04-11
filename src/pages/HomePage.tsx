@@ -98,6 +98,10 @@ export default function HomePage() {
     navigate(`/catalogo/${id}`);
   }
 
+  function handleTagClick(tag: string) {
+    navigate(`/catalogo?tag=${encodeURIComponent(tag)}`);
+  }
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center min-h-full py-16 px-6">
       {/* Title */}
@@ -165,24 +169,26 @@ export default function HomePage() {
         {/* Row 1 */}
         <div className="flex flex-wrap gap-2">
           {ROW1_TAGS.map((tag) => (
-            <span
+            <button
               key={tag}
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-default select-none border border-transparent hover:border-current/25 transition-colors duration-150 ${tagColor(tag)}`}
+              onClick={() => handleTagClick(tag)}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer border border-transparent hover:border-current/25 transition-colors duration-150 ${tagColor(tag)}`}
             >
               {tag}
-            </span>
+            </button>
           ))}
         </div>
 
         {/* Row 2 + "Confira mais tags" */}
         <div className="flex flex-wrap gap-2 items-center">
           {ROW2_TAGS.map((tag) => (
-            <span
+            <button
               key={tag}
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-default select-none border border-transparent hover:border-current/25 transition-colors duration-150 ${tagColor(tag)}`}
+              onClick={() => handleTagClick(tag)}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer border border-transparent hover:border-current/25 transition-colors duration-150 ${tagColor(tag)}`}
             >
               {tag}
-            </span>
+            </button>
           ))}
           <span className="text-xs font-medium text-primary underline underline-offset-2 cursor-default select-none px-2 py-1 rounded-full border border-transparent hover:border-primary/40 transition-colors duration-150">
             Confira mais tags

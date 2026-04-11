@@ -55,7 +55,7 @@ export default function CatalogPage() {
   const [, navigate] = useLocation();
   const [search, setSearch] = useState(() => new URLSearchParams(window.location.search).get("q") ?? "");
   const [typeFilter, setTypeFilter] = useState<string>("todos");
-  const [tagFilter, setTagFilter] = useState<string>("todas");
+  const [tagFilter, setTagFilter] = useState<string>(() => new URLSearchParams(window.location.search).get("tag") ?? "todas");
   const [dbFilter, setDbFilter] = useState<string>("todos");
   const [entries, setEntries] = useState<CatalogEntry[]>(MOCK_CATALOG);
 
