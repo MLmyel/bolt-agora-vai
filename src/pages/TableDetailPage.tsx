@@ -26,11 +26,12 @@ import {
   Trash2,
   Copy,
   Check,
+  Pencil,
 } from "lucide-react";
-import { MOCK_CATALOG } from "@/lib/mockData";
+import { MOCK_CATALOG, FieldDefinition, OwnerInfo } from "@/lib/mockData";
 import { useRole } from "@/lib/roleContext";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DeleteModal from "@/components/DeleteModal";
 
 /* ─── SQL Syntax Highlighter ───────────────────────────────────────── */
@@ -207,6 +208,99 @@ function typeColor(type: string) {
   return DATA_TYPE_COLORS[base] ?? "text-slate-600 bg-slate-100";
 }
 
+/* ─── Inline Edit Field ─────────────────────────────────────────────── */
+
+function InlineField({
+  value,
+  onChange,
+  canEdit,
+  multiline = false,
+  textClassName = "",
+  inputClassName = "",
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  canEdit: boolean;
+  multiline?: boolean;
+  textClassName?: string;
+  inputClassName?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => {
+    if (!editing) setDraft(value);
+  }, [value, editing]);
+
+  function startEdit() {
+    if (!canEdit) return;
+    setDraft(value);
+    setEditing(true);
+  }
+
+  function commit() {
+    onChange(draft);
+    setEditing(false);
+  }
+
+  if (editing) {
+    if (multiline) {
+      return (
+        <textarea
+          autoFocus
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => { if (e.key === "Escape") { setDraft(value); setEditing(false); } }}
+          className={cn(
+            "w-full resize-none border border-primary/40 rounded-lg px-2 py-1.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white",
+            inputClassName
+          )}
+          rows={4}
+        />
+      );
+    }
+    return (
+      <input
+        autoFocus
+        type="text"
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setDraft(value); setEditing(false); } }}
+        className={cn(
+          "w-full border border-primary/40 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white",
+          inputClassName
+        )}
+      />
+    );
+  }
+
+  if (multiline) {
+    return (
+      <div
+        className={cn("group/field flex items-start gap-1.5", canEdit && "cursor-text hover:bg-primary/5 rounded-md px-1 -mx-1 transition-colors")}
+        onClick={startEdit}
+      >
+        <p className={textClassName}>{value}</p>
+        {canEdit && <Pencil className="w-3 h-3 text-muted-foreground/30 opacity-0 group-hover/field:opacity-100 transition-opacity flex-shrink-0 mt-1" />}
+      </div>
+    );
+  }
+
+  return (
+    <span
+      className={cn("group/field inline-flex items-center gap-1", canEdit && "cursor-text hover:bg-primary/5 rounded px-0.5 -mx-0.5 transition-colors")}
+      onClick={startEdit}
+    >
+      <span className={textClassName}>{value}</span>
+      {canEdit && <Pencil className="w-3 h-3 text-muted-foreground/30 opacity-0 group-hover/field:opacity-100 transition-opacity flex-shrink-0" />}
+    </span>
+  );
+}
+
+/* ─── Info Cards ────────────────────────────────────────────────────── */
+
 function InfoCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
     <div className="flex items-start gap-3 py-3 border-b border-border last:border-0">
@@ -221,12 +315,56 @@ function InfoCard({ icon: Icon, label, value }: { icon: React.ElementType; label
   );
 }
 
+function EditableInfoCard({
+  icon: Icon,
+  label,
+  value,
+  onChange,
+  canEdit,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  canEdit: boolean;
+}) {
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-border last:border-0">
+      <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Icon className="w-3.5 h-3.5 text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+        <InlineField
+          value={value}
+          onChange={onChange}
+          canEdit={canEdit}
+          textClassName="text-sm text-foreground mt-0.5 break-words"
+          inputClassName="mt-0.5"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function TableDetailPage() {
   const params = useParams<{ id: string }>();
   const { isManager } = useRole();
   const [deleteModal, setDeleteModal] = useState(false);
 
   const entry = MOCK_CATALOG.find((e) => e.id === params.id);
+
+  const [localDesc, setLocalDesc] = useState(entry?.longDescription ?? "");
+  const [localFields, setLocalFields] = useState<FieldDefinition[]>(entry?.fields ?? []);
+  const [localOwner, setLocalOwner] = useState<OwnerInfo | null>(entry?.ownerInfo ?? null);
+
+  function updateField(idx: number, key: keyof FieldDefinition, val: string) {
+    setLocalFields(prev => prev.map((f, i) => i === idx ? { ...f, [key]: val } : f));
+  }
+
+  function updateOwner(key: keyof OwnerInfo, val: string) {
+    setLocalOwner(prev => prev ? { ...prev, [key]: val } : prev);
+  }
 
   if (!entry) {
     return (
@@ -288,7 +426,13 @@ export default function TableDetailPage() {
               </span>
               <h1 className="text-xl font-bold text-foreground font-mono">{entry.tableName}</h1>
             </div>
-            <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">{entry.longDescription}</p>
+            <InlineField
+              value={localDesc}
+              onChange={setLocalDesc}
+              canEdit={isManager}
+              multiline
+              textClassName="text-sm text-muted-foreground max-w-2xl leading-relaxed"
+            />
           </div>
         </div>
 
@@ -375,9 +519,9 @@ export default function TableDetailPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {entry.fields.map((field, idx) => (
+                  {localFields.map((field, idx) => (
                     <tr
-                      key={field.name}
+                      key={idx}
                       className={cn(
                         "hover:bg-muted/20 transition-colors",
                         field.isPrimaryKey && "bg-amber-50/50 hover:bg-amber-50"
@@ -400,14 +544,13 @@ export default function TableDetailPage() {
 
                       {/* Nome */}
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "font-mono text-sm font-semibold",
-                            field.isPrimaryKey ? "text-amber-700" : "text-foreground"
-                          )}>
-                            {field.name}
-                          </span>
-                        </div>
+                        <InlineField
+                          value={field.name}
+                          onChange={val => updateField(idx, "name", val)}
+                          canEdit={isManager}
+                          textClassName={cn("font-mono text-sm font-semibold", field.isPrimaryKey ? "text-amber-700" : "text-foreground")}
+                          inputClassName="font-mono font-semibold"
+                        />
                         {field.isForeignKey && field.foreignRef && (
                           <p className="text-xs text-blue-600 font-mono mt-0.5 opacity-70">
                             → {field.foreignRef}
@@ -417,12 +560,13 @@ export default function TableDetailPage() {
 
                       {/* Tipo */}
                       <td className="px-4 py-3">
-                        <span className={cn(
-                          "font-mono text-xs px-2 py-0.5 rounded font-medium",
-                          typeColor(field.type)
-                        )}>
-                          {field.type}
-                        </span>
+                        <InlineField
+                          value={field.type}
+                          onChange={val => updateField(idx, "type", val)}
+                          canEdit={isManager}
+                          textClassName={cn("font-mono text-xs px-2 py-0.5 rounded font-medium", typeColor(field.type))}
+                          inputClassName="font-mono text-xs w-32"
+                        />
                       </td>
 
                       {/* Nullable */}
@@ -436,7 +580,12 @@ export default function TableDetailPage() {
 
                       {/* Descrição */}
                       <td className="px-4 py-3">
-                        <p className="text-sm text-muted-foreground leading-snug">{field.description}</p>
+                        <InlineField
+                          value={field.description}
+                          onChange={val => updateField(idx, "description", val)}
+                          canEdit={isManager}
+                          textClassName="text-sm text-muted-foreground leading-snug"
+                        />
                       </td>
                     </tr>
                   ))}
@@ -459,19 +608,25 @@ export default function TableDetailPage() {
               {/* Avatar + nome */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
-                  {entry.ownerInfo.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+                  {(localOwner?.name ?? entry.ownerInfo.name).split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
                 </div>
-                <div>
-                  <p className="font-semibold text-foreground">{entry.ownerInfo.name}</p>
-                  <p className="text-xs text-muted-foreground">{entry.ownerInfo.team}</p>
+                <div className="flex-1 min-w-0">
+                  <InlineField
+                    value={localOwner?.name ?? entry.ownerInfo.name}
+                    onChange={val => updateOwner("name", val)}
+                    canEdit={isManager}
+                    textClassName="font-semibold text-foreground"
+                    inputClassName="font-semibold"
+                  />
+                  <p className="text-xs text-muted-foreground">{localOwner?.team ?? entry.ownerInfo.team}</p>
                 </div>
               </div>
 
               <div className="space-y-0 divide-y divide-border">
-                <InfoCard icon={Mail} label="E-mail" value={entry.ownerInfo.email} />
-                <InfoCard icon={Users} label="Time" value={entry.ownerInfo.team} />
-                <InfoCard icon={Crown} label="Líder do Time" value={entry.ownerInfo.teamLead} />
-                <InfoCard icon={MessageSquare} label="Canal Slack" value={entry.ownerInfo.slack} />
+                <EditableInfoCard icon={Mail} label="E-mail" value={localOwner?.email ?? entry.ownerInfo.email} onChange={val => updateOwner("email", val)} canEdit={isManager} />
+                <EditableInfoCard icon={Users} label="Time" value={localOwner?.team ?? entry.ownerInfo.team} onChange={val => updateOwner("team", val)} canEdit={isManager} />
+                <EditableInfoCard icon={Crown} label="Líder do Time" value={localOwner?.teamLead ?? entry.ownerInfo.teamLead} onChange={val => updateOwner("teamLead", val)} canEdit={isManager} />
+                <EditableInfoCard icon={MessageSquare} label="Canal Slack" value={localOwner?.slack ?? entry.ownerInfo.slack} onChange={val => updateOwner("slack", val)} canEdit={isManager} />
               </div>
             </div>
           </div>
